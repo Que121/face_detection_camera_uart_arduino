@@ -22,66 +22,72 @@ FACE_DETEC_CONF= project_path + "/scripts/face_detection.conf"
 CAMERA_FRAME_WIDTH = 1280
 CAMERA_FRAME_HEIGHT = 720
 
+SCORE = 2
+
 def main():
     """main"""
-    # Open /dev/ttyAMA1 with baudrate 115200
+    # 打开 /dev/ttyAMA1 串口波特率为115200
     ser = Serial("/dev/ttyAMA1", 115200)
-
     print("uart connection test")
-
     print("Write to UART")
 
-    ser.write(b"Hello from Atlas 200 DK\n")
+    # ser.write(b"Hello from Atlas 200 DK\n")
         
-    # Read up to 32 bytes, with timeout of 2 seconds
-    readdata = ser.read(32, 2).decode('utf-8')
-    print(f'Received reply: {readdata}')
-
-   
-    # Initialize acl
+    # 初始化ACL 具有多个类别的一组规则执行 N 元组搜索
     acl_resource = AclLiteResource()
     acl_resource.init()
    
-    # Create a detection network instance, currently using the vgg_ssd network. 
-    # When the detection network is replaced, instantiate a new network here
+    # 创建一个检测网络实例，目前使用vgg_ssd网络。
+    # 当检测网络被替换时，在此实例化一个新的网络
     detect = VggSsd(acl_resource, MODEL_WIDTH, MODEL_HEIGHT)
     
-    # Load offline model 
+    # 加载离线模型
     model = AclLiteModel(MODEL_PATH)
 
-    # Connect to the presenter server according to the configuration, 
-    # and end the execution of the application if the connection fails
+    # 根据配置连接到presenter服务器。 
+    # 并在连接失败时结束应用程序的执行
     chan = presenter_channel.open_channel(FACE_DETEC_CONF)
     
     if chan is None:
         print("Open presenter channel failed")
         return
     
-    # Open the CARAMER0 camera on the development board
+    # 打开开发板上的CARAMER0摄像头
     cap = CameraCapture(0)
     while True:
        
-        #Read a picture from the camera
+        # 从相机获取图像
         image = cap.read()
         if image is None:
             print("Get memory from camera failed")
             break
         
-        #The detection network processes images into model input data
+        # 检测网络将图像处理成模型输入数据
         model_input = detect.pre_process(image)
         if model_input is None:
             print("Pre process image failed")
             break
        
-        #Send data to offline model inference
+        # 发送数据到离线模型推理
         result = model.execute(model_input)
        
-        #Detecting network analysis inference output
+        # 检测网络分析推理输出
         jpeg_image, detection_list = detect.post_process(result, image)
+        
+        # 是否有图像
         if jpeg_image is None:
             print("The jpeg image for present is None")
             break
         
+        # box_num = int(result[0][0, 0])
+    
+        # box_info = result[1][0]
+        # for i in range(box_num):
+        #     # 识别到的物体的置信度
+        #     score = box_info[i, SCORE]
+
+                 
+            
         chan.send_detection_data(CAMERA_FRAME_WIDTH, CAMERA_FRAME_HEIGHT, 
                                  jpeg_image, detection_list)
 

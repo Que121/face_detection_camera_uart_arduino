@@ -2,7 +2,7 @@
 ScriptPath="$( cd "$(dirname "$BASH_SOURCE")" ; pwd -P )"
 ModelPath="${ScriptPath}/../model"
 conf_file_name="face_detection.conf"
-common_script_dir=${ScriptPath}/../../../../../common
+common_script_dir=${ScriptPath}/../../common
 . ${common_script_dir}/sample_common.sh
 
 function main()
