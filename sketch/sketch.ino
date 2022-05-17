@@ -1,12 +1,12 @@
 void setup() {
-  Serial.begin(115200);         // start serial connection with baudrate 115200
+  Serial.begin(115200);         // 启动串行连接，波特率为115200
 }
 
 void loop() {
-  if(Serial.available() > 0){                         // check if there is bytes available to read in buffer
-    String str = Serial.readString();                 // read bytes as string
-    if(str.equals("Hello from Atlas 200 DK\n")){      // write a response if string received is "Hello from Atlas 200 DK"
-      Serial.println("Arduino: Hello from Arduino");
+  if(Serial.available() > 0){                         // 检查缓冲区内是否有可用的字节可供读取
+    String str = Serial.readString();                 // 读取字节为字符串
+    if(str.equals("1\n")){      
+      Serial.println("Arduino: 1\n");
     }
   }
 }
